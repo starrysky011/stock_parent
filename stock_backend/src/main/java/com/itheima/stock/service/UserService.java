@@ -5,6 +5,8 @@ import com.itheima.stock.vo.req.LoginReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.R;
 
+import java.util.Map;
+
 /**
  * ClassName: UserService
  * Package: com.itheima.stock.service
@@ -28,4 +30,10 @@ public interface UserService {
      * @return
      */
     R<LoginRespVo> login(LoginReqVo vo);
+
+    /**
+     * 生成图片验证码功能
+     * @return
+     */
+    R<Map> getCaptchaCode();
 }
