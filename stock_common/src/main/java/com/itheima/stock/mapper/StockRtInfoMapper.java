@@ -1,6 +1,11 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.StockRtInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author starrysky
@@ -22,4 +27,12 @@ public interface StockRtInfoMapper {
 
     int updateByPrimaryKey(StockRtInfo record);
 
+    /**
+     * 查询指定时间范围内每分钟涨停或者跌停的数量
+     *  @param openTime 开始时间
+     *  @param curTime 结束时间 一般开始时间和结束时间在同一天
+     *  @param flag 约定:1->涨停 0:->跌停
+     *  @return
+     */
+    List<Map> getStockUpdownCount(@Param("openTime") Date openTime, @Param("curTime") Date curTime, @Param("flag") int flag);
 }

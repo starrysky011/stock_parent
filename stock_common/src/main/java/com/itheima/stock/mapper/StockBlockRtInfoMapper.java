@@ -1,6 +1,12 @@
 package com.itheima.stock.mapper;
 
+import com.itheima.stock.pojo.domain.StockBlockDomain;
+import com.itheima.stock.pojo.domain.StockUpdownDomain;
 import com.itheima.stock.pojo.entity.StockBlockRtInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author starrysky
@@ -22,4 +28,26 @@ public interface StockBlockRtInfoMapper {
 
     int updateByPrimaryKey(StockBlockRtInfo record);
 
+
+    /**
+     * 沪深两市板块分时行情数据查询，以交易时间和交易总金额降序查询，取前10条数据
+     * @param timePoint 指定时间点
+     * @return
+     */
+    List<StockBlockDomain> sectorAllLimit(@Param("timePoint") Date lastDate);
+
+    /**
+     * 查询指定时间点下股票的数据，并按照涨幅降序排序
+     * @param curDate
+     * @return
+     */
+    List<StockUpdownDomain> getNewestStockInfo(@Param("timePoint") Date curDate);
+
+
+    /**
+     * 统计沪深两市个股最新交易数据，并按涨幅降序排序查询前4条数据
+     * @param newDate
+     * @return
+     */
+    List<StockUpdownDomain> StockInfo(Date newDate);
 }

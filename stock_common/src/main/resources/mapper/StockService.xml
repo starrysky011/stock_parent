@@ -28,6 +28,57 @@
         from stock_block_rt_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
+    <select id="sectorAllLimit" resultType="com.itheima.stock.pojo.domain.StockBlockDomain"
+            >
+        select
+            sbr.company_num  as companyNum,
+            sbr.trade_amount as tradeAmt,
+            sbr.label        as code,
+            sbr.avg_price    as avgPrice,
+            sbr.block_name   as name,
+            sbr.cur_time     as curDate,
+            sbr.trade_volume as tradeVol,
+            sbr.updown_rate  as updownRate
+        from stock_block_rt_info as sbr
+        where sbr.cur_time=#{timePoint}
+        order by sbr.trade_volume desc
+            limit 10
+    </select>
+    <select id="getNewestStockInfo" resultType="com.itheima.stock.pojo.domain.StockUpdownDomain"
+            parameterType="java.util.Date">
+        select
+            sri.trade_amount as tradeAmt,
+            sri.pre_close_price as preClosePrice,
+            (sri.max_price-sri.min_price)/sri.pre_close_price as amplitude,
+            sri.stock_code as code,
+            sri.stock_name as  name,
+            sri.cur_time as curDate,
+            sri.trade_volume as tradeVol,
+            sri.cur_price-sri.pre_close_price as increase,
+            (sri.cur_price-sri.pre_close_price) /pre_close_price as upDown,
+            sri.cur_price as tradePrice
+        from stock_rt_info as   sri
+        where sri.cur_time=#{timePoint}
+        order by upDown desc
+    </select>
+    <select id="StockInfo" resultType="com.itheima.stock.pojo.domain.StockUpdownDomain"
+            parameterType="java.util.Date">
+        select
+            sri.trade_amount as tradeAmt,
+            sri.pre_close_price as preClosePrice,
+            (sri.max_price-sri.min_price)/sri.pre_close_price as amplitude,
+            sri.stock_code as code,
+            sri.stock_name as  name,
+            sri.cur_time as curDate,
+            sri.trade_volume as tradeVol,
+            sri.cur_price-sri.pre_close_price as increase,
+            (sri.cur_price-sri.pre_close_price) /pre_close_price as upDown,
+            sri.cur_price as tradePrice
+        from stock_rt_info as   sri
+        where sri.cur_time=#{timePoint}
+        order by upDown desc
+            limit 4
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_block_rt_info
