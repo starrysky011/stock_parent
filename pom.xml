@@ -10,6 +10,7 @@
     <modules>
         <module>stock_common</module>
         <module>stock_backend</module>
+        <module>stock_job</module>
     </modules>
     <packaging>pom</packaging>
     <description>

@@ -1,8 +1,6 @@
 package com.itheima.stock.controller;
 
-import com.itheima.stock.pojo.domain.InnerMarketDomain;
-import com.itheima.stock.pojo.domain.StockBlockDomain;
-import com.itheima.stock.pojo.domain.StockUpdownDomain;
+import com.itheima.stock.pojo.domain.*;
 import com.itheima.stock.service.StockService;
 import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
@@ -125,4 +123,44 @@ public class StockController {
         return stockService.stockTradeVol4InnerMarket();
     }
 
+    /**
+     * 查询当前时间下股票的涨跌幅度区间统计功能
+     * 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询点
+     * @return
+     */
+    @ApiOperation(value = "查询当前时间下股票的涨跌幅度区间统计功能 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询点", notes = "查询当前时间下股票的涨跌幅度区间统计功能 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询点", httpMethod = "GET")
+    @GetMapping("/stock/updown")
+    public R<Map> getStockUpDown(){
+        return stockService.stockUpDownScopeCount();
+    }
+
+    /**
+     * 功能描述：查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     *         如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点
+     * @param code 股票编码
+     * @return
+     */
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "股票编码", required = true)
+    })
+    @ApiOperation(value = "功能描述：查询单个个股的分时行情数据", notes = "功能描述：查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；         如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点", httpMethod = "GET")
+    @GetMapping("/stock/screen/time-sharing")
+    public R<List<Stock4MinuteDomain>> stockScreenTimeSharing(@RequestParam(value = "code" ,required = true) String code){
+        return stockService.stockScreenTimeSharing(code);
+    }
+
+
+    /**
+     * 单个个股日K 数据查询 ，可以根据时间区间查询数日的K线数据
+     * @param stockCode 股票编码
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "股票编码", required = true)
+    })
+    @ApiOperation(value = "单个个股日K 数据查询 ，可以根据时间区间查询数日的K线数据", notes = "单个个股日K 数据查询 ，可以根据时间区间查询数日的K线数据", httpMethod = "GET")
+    @GetMapping("/stock/screen/dkline")
+    public R<List<Stock4EvrDayDomain>> getDayKLinData(@RequestParam("code") String stockCode){
+        return stockService.stockCreenDkLine(stockCode);
+    }
 }

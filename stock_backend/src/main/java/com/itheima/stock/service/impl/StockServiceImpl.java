@@ -9,9 +9,7 @@ import com.itheima.stock.mapper.StockBlockRtInfoMapper;
 import com.itheima.stock.mapper.StockBusinessMapper;
 import com.itheima.stock.mapper.StockMarketIndexInfoMapper;
 import com.itheima.stock.mapper.StockRtInfoMapper;
-import com.itheima.stock.pojo.domain.InnerMarketDomain;
-import com.itheima.stock.pojo.domain.StockBlockDomain;
-import com.itheima.stock.pojo.domain.StockUpdownDomain;
+import com.itheima.stock.pojo.domain.*;
 import com.itheima.stock.pojo.entity.StockBusiness;
 import com.itheima.stock.pojo.vo.StockInfoConfig;
 import com.itheima.stock.service.StockService;
@@ -30,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ClassName: StockServiceImpl
@@ -270,5 +269,134 @@ public class StockServiceImpl implements StockService {
         info.put("yesAmtList",data4PreT);
         //5.返回数据
         return R.ok(info);
+    }
+
+
+    /**
+     * 功能描述：统计在当前时间下（精确到分钟），股票在各个涨跌区间的数量
+     *  如果当前不在股票有效时间内，则以最近的一个有效股票交易时间作为查询时间点；
+     * @return
+     *  响应数据格式：
+     *  {
+     *     "code": 1,
+     *     "data": {
+     *         "time": "2021-12-31 14:58:00",
+     *         "infos": [
+     *             {
+     *                 "count": 17,
+     *                 "title": "-3~0%"
+     *             },
+     *             //...
+     *             ]
+     *     }
+     */
+    @Override
+    public R<Map> stockUpDownScopeCount() {
+        //1 获取股票最新一次交易的时间点
+        Date curDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+        //TODO mock data
+        curDate=DateTime.parse("2022-01-06 09:55:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //2 查询股票信息
+        List<Map> maps= stockRtInfoMapper.getStockUpDownSectionByTime(curDate);
+        //2.1 获取有序的标题集合
+        List<String> orderSections = stockInfoConfig.getUpDownRange();
+        //思路：利用List集合的属性，然后顺序编译，找出每个标题对应的map，然后维护到一个新的List集合下即可
+//        List<Map> orderMaps =new ArrayList<>();
+//        for (String title : orderSections) {
+//            Map map=null;
+//            for (Map m : maps) {
+//                if (m.containsValue(title)) {
+//                    map=m;
+//                    break;
+//                }
+//            }
+//            if (map==null) {
+//                map=new HashMap();
+//                map.put("count",0);
+//                map.put("title",title);
+//            }
+//            orderMaps.add(map);
+//        }
+        //方式2：使用lambda表达式指定
+        List<Map> orderMaps  =  orderSections.stream().map(title->{
+            Map mp=null;
+            Optional<Map> op = maps.stream().filter(m -> m.containsValue(title)).findFirst();
+            //判断是否存在符合过滤条件的元素
+            if (op.isPresent()) {
+                mp=op.get();
+            }else{
+                mp=new HashMap();
+                mp.put("count",0);
+                mp.put("title",title);
+            }
+            return mp;
+        }).collect(Collectors.toList());
+        //3 组装数据
+        HashMap<String, Object> mapInfo = new HashMap<>();
+        //获取指定日期格式的字符串
+        String curDateStr = new DateTime(curDate).toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        mapInfo.put("time",curDateStr);
+        mapInfo.put("infos",orderMaps);
+        //4返回数据
+        return R.ok(mapInfo);
+    }
+
+    /**
+     * 功能描述：查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     *         如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点
+     * @param code 股票编码
+     * @return
+     */
+    @Override
+    public R<List<Stock4MinuteDomain>> stockScreenTimeSharing(String code) {
+        //1.获取最近最新的交易时间点和对应的开盘日期
+        //1.1 获取最近有效时间点
+        DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date endTime = lastDate4Stock.toDate();
+        //TODO mockdata
+        endTime=DateTime.parse("2021-12-30 14:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //1.2 获取最近有效时间点对应的开盘日期
+        DateTime openDateTime = DateTimeUtil.getOpenDate(lastDate4Stock);
+        Date startTime = openDateTime.toDate();
+        //TODO MOCK DATA
+        startTime=DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //2.根据股票code和日期范围查询
+        List<Stock4MinuteDomain> list = stockRtInfoMapper.getStockInfoByCodeAndDate(code,startTime,endTime);
+        //判断非空处理
+        if (CollectionUtils.isEmpty(list)) {
+            list=new ArrayList<>();
+        }
+        //3.返回响应数据
+        return R.ok(list);
+    }
+
+    /**
+     * 功能描述：单个个股日K数据查询 ，可以根据时间区间查询数日的K线数据
+     * 		默认查询历史20天的数据；
+     * @param stockCode 股票编码
+     * @return
+     */
+    @Override
+    public R<List<Stock4EvrDayDomain>> stockCreenDkLine(String stockCode) {
+        //1.获取查询的日期范围
+        //1.1 获取截止时间
+        DateTime endDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date endTime = endDateTime.toDate();
+        //TODO MOCKDATA
+        endTime=DateTime.parse("2022-01-07 15:00:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //1.2 获取开始时间
+        DateTime startDateTime = endDateTime.minusDays(10);
+        Date startTime = startDateTime.toDate();
+        //TODO MOCKDATA
+        startTime=DateTime.parse("2022-01-01 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //2.调用mapper接口获取查询的集合信息-方案1
+//        List<Stock4EvrDayDomain> data= stockRtInfoMapper.getStockInfo4EvrDay(stockCode,startTime,endTime);
+
+        //方案2：先获取指定日期范围内的收盘时间点集合
+        List<Date> closeDates = stockRtInfoMapper.getCloseDates(stockCode, startTime, endTime);
+        //根据收盘时间获取日K数据
+        List<Stock4EvrDayDomain> data = stockRtInfoMapper.getStockCreenDkLineData(stockCode, closeDates);
+        //3.组装数据，响应
+        return R.ok(data);
     }
 }
