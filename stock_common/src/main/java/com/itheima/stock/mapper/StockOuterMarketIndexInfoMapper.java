@@ -1,6 +1,11 @@
 package com.itheima.stock.mapper;
 
+import com.itheima.stock.pojo.domain.StockOuterMarketDomain;
 import com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author starrysky
@@ -22,4 +27,11 @@ public interface StockOuterMarketIndexInfoMapper {
 
     int updateByPrimaryKey(StockOuterMarketIndexInfo record);
 
+    /**
+     * 查询国外大盘信息
+     * @param outer
+     * @param lastDate
+     * @return
+     */
+    List<StockOuterMarketDomain> getOuterMarketInfo(@Param("outer") List<String> outer,@Param("lastDate") Date lastDate);
 }

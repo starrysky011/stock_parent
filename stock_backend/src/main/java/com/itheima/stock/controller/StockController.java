@@ -1,5 +1,6 @@
 package com.itheima.stock.controller;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.itheima.stock.pojo.domain.*;
 import com.itheima.stock.service.StockService;
 import com.itheima.stock.vo.resp.PageResult;
@@ -33,6 +34,8 @@ import java.util.Map;
 public class StockController {
     @Autowired
     private StockService stockService;
+
+
 
     /**
      * 获取国内最新大盘指数
@@ -162,5 +165,17 @@ public class StockController {
     @GetMapping("/stock/screen/dkline")
     public R<List<Stock4EvrDayDomain>> getDayKLinData(@RequestParam("code") String stockCode){
         return stockService.stockCreenDkLine(stockCode);
+    }
+
+
+    /**
+     * 获取外盘信息
+     * @return
+     */
+    @ApiOperation(value = "获取外盘信息", notes = "获取外盘信息", httpMethod = "GET")
+    @GetMapping("/external/index")
+    public R<List<StockOuterMarketDomain>> getOuterMarketAll(){
+
+        return stockService.getOuterMarketAll();
     }
 }

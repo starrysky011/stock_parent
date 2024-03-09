@@ -2,6 +2,7 @@ package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.domain.Stock4EvrDayDomain;
 import com.itheima.stock.pojo.domain.Stock4MinuteDomain;
+import com.itheima.stock.pojo.domain.StockSearchDomain;
 import com.itheima.stock.pojo.entity.StockRtInfo;
 import org.apache.ibatis.annotations.Param;
 
@@ -92,4 +93,11 @@ public interface StockRtInfoMapper {
      * @param stockRtInfoList
      */
     int insertBatch(List<StockRtInfo> stockRtInfoList);
+
+    /**
+     * 搜索股票
+     * @param searchStr
+     * @return
+     */
+    List<StockSearchDomain> getSearchMarket(@Param("searchStr") String searchStr);
 }

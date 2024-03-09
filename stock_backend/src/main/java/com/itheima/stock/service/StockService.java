@@ -80,4 +80,16 @@ public interface StockService {
      * @param stockCode 股票编码
      */
     R<List<Stock4EvrDayDomain>> stockCreenDkLine(String stockCode);
+
+    /**
+     * 获取外盘信息
+     * @return
+     */
+    R<List<StockOuterMarketDomain>> getOuterMarketAll();
+
+    /**
+     * 搜索股票
+     * @return
+     */
+    R<List<StockSearchDomain>> getSearchMarket(String searchStr);
 }

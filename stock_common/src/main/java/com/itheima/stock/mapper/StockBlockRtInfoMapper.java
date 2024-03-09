@@ -50,4 +50,11 @@ public interface StockBlockRtInfoMapper {
      * @return
      */
     List<StockUpdownDomain> StockInfo(Date newDate);
+
+    /**
+     * 板块信息批量插入
+     * @param list
+     * @return
+     */
+    int insertBatch(List<StockBlockRtInfo> list);
 }
